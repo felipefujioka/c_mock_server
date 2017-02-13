@@ -1,0 +1,3 @@
+/Users/felipefujioka/CLionProjects/c_mock_server/cmake-build-debug/CMakeFiles/edit_cache.dir
+/Users/felipefujioka/CLionProjects/c_mock_server/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/Users/felipefujioka/CLionProjects/c_mock_server/cmake-build-debug/CMakeFiles/untitled.dir
