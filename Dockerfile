@@ -4,6 +4,6 @@ COPY . /usr/src/myapp
 
 WORKDIR /usr/src/myapp
 
-RUN gcc -o myapp main.c
+RUN make
 
-CMD ["./myapp", "4200"]
+CMD ["./mock_server", "4200"]
