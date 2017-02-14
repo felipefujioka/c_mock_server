@@ -1,11 +1,12 @@
+#include <netinet/in.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
-#include <sys/types.h>
 #include <sys/socket.h>
-#include <netinet/in.h>
+#include <sys/time.h>
+#include <sys/types.h>
 #include <time.h>
+#include <unistd.h>
 
 #define BUFFER_SIZE 2048
 
@@ -31,15 +32,12 @@ int main(int argc, char *argv[]) {
   FILE * file;
   int messages_sent = 0;
 
-  clock_t start;
-  clock_t end;
+  clock_t cpu_start;
+  clock_t cpu_end;
   double elapsed_time;
 
-  time_t rawtime;
-  struct tm * timeinfo;
-
-  time ( &rawtime );
-  timeinfo = localtime ( &rawtime );
+  double elapsed_wallclock_time;
+  struct timeval wallclock_start, wallclock_end;
 
   if (argc < 3) {
     fprintf(stderr,"ERROR, no port or filename provided\n");
@@ -83,9 +81,11 @@ int main(int argc, char *argv[]) {
   printf("Received: %s\n", buffer);
 
   /* Send first message            */
-  start = clock();
+  gettimeofday(&wallclock_start, NULL);
+  cpu_start = clock();
   fscanf(file, "%s\n", fix_logon_answer);
   n = write(newsockfd, fix_logon_answer, strlen(fix_logon_answer));
+  messages_sent++;
   if (n < 0) {
     error("ERROR writing to socket");
   }
@@ -115,11 +115,14 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  end = clock();
+  cpu_end = clock();
+  gettimeofday(&wallclock_end, NULL);
 
-  elapsed_time = ((double)(end-start))/CLOCKS_PER_SEC;
+  elapsed_time = ((double) (cpu_end - cpu_start)) / CLOCKS_PER_SEC;
+  elapsed_wallclock_time = (double) (((long) (wallclock_end.tv_sec * 1000000 + wallclock_end.tv_usec)
+                                      - (wallclock_start.tv_sec * 1000000 + wallclock_start.tv_usec))) / 1000;
 
-  printf("sent %d messages in %f s", messages_sent,  elapsed_time);
+  printf("Sent %d messages in %fs (CPU) %fms (real)\n", messages_sent,  elapsed_time, elapsed_wallclock_time);
 
   close(newsockfd);
   close(sockfd);
