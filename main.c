@@ -5,6 +5,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <time.h>
 
 #define BUFFER_SIZE 2048
 
@@ -28,6 +29,17 @@ int main(int argc, char *argv[]) {
   char* filename;
 
   FILE * file;
+  int messages_sent = 0;
+
+  clock_t start;
+  clock_t end;
+  double elapsed_time;
+
+  time_t rawtime;
+  struct tm * timeinfo;
+
+  time ( &rawtime );
+  timeinfo = localtime ( &rawtime );
 
   if (argc < 3) {
     fprintf(stderr,"ERROR, no port or filename provided\n");
@@ -71,6 +83,7 @@ int main(int argc, char *argv[]) {
   printf("Received: %s\n", buffer);
 
   /* Send first message            */
+  start = clock();
   fscanf(file, "%s\n", fix_logon_answer);
   n = write(newsockfd, fix_logon_answer, strlen(fix_logon_answer));
   if (n < 0) {
@@ -88,6 +101,7 @@ int main(int argc, char *argv[]) {
   /* Send second message */
   fscanf(file, "%s\n", fix_subscription_answer);
   n = write(newsockfd, fix_subscription_answer, strlen(fix_subscription_answer));
+  messages_sent++;
   if (n < 0) {
     error("ERROR writing to socket");
   }
@@ -95,10 +109,17 @@ int main(int argc, char *argv[]) {
   /* Send remaining messages */
   while ((n = fscanf(file, "%s\n", line)) != EOF) {
     n = write(newsockfd, line, strlen(line));
+    messages_sent++;
     if (n < 0) {
       error("ERROR writing to socket");
     }
   }
+
+  end = clock();
+
+  elapsed_time = ((double)(end-start))/CLOCKS_PER_SEC;
+
+  printf("sent %d messages in %f s", messages_sent,  elapsed_time);
 
   close(newsockfd);
   close(sockfd);
