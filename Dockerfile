@@ -6,4 +6,4 @@ WORKDIR /usr/src/myapp
 
 RUN gcc -o myapp main.c
 
-CMD ["./myapp", "8888"]
+CMD ["./myapp"]
