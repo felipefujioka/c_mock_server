@@ -25,7 +25,7 @@ int main(int argc, char *argv[]) {
   char fix_logon_answer[100];
   char fix_subscription_answer[100];
 
-  FILE * file = fopen("entries.txt", "r");
+  FILE * file = fopen("1000000.msgs", "r");
 
   if (argc < 2) {
     fprintf(stderr,"ERROR, no port provided\n");
@@ -57,24 +57,27 @@ int main(int argc, char *argv[]) {
     error("ERROR on accept");
   }
 
-  bzero(buffer, BUFFER_SIZE);
-  n = read(newsockfd, buffer, BUFFER_SIZE);
-  if (n < 0) {
-    error("ERROR reading from socket");
-  }
+  /* bzero(buffer, BUFFER_SIZE); */
+  /* n = read(newsockfd, buffer, BUFFER_SIZE); */
+  /* if (n < 0) { */
+  /*   error("ERROR reading from socket"); */
+  /* } */
+  /* printf("Received: %s\n", buffer); */
 
-  /* Send first message */
+  /* Send first message            */
   fscanf(file, "%s\n", fix_logon_answer);
   n = write(newsockfd, fix_logon_answer, strlen(fix_logon_answer));
   if (n < 0) {
     error("ERROR writing to socket");
   }
 
-  bzero(buffer, BUFFER_SIZE);
-  n = read(newsockfd, buffer, BUFFER_SIZE);
-  if (n < 0) {
-    error("ERROR reading from socket");
-  }
+  /* Do not wait the second message */
+  /* bzero(buffer, BUFFER_SIZE); */
+  /* n = read(newsockfd, buffer, BUFFER_SIZE); */
+  /* if (n < 0) { */
+  /*   error("ERROR reading from socket"); */
+  /* } */
+  /* printf("Received: %s\n", buffer); */
 
   /* Send second message */
   fscanf(file, "%s\n", fix_subscription_answer);
