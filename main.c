@@ -14,23 +14,18 @@ void error(const char *msg) {
 }
 
 int main(int argc, char *argv[]) {
-  int sockfd, newsockfd, portno;
-  socklen_t clilen;
-  char buffer[BUFFER_SIZE];
-  struct sockaddr_in serv_addr, cli_addr;
   int n;
-  int i;
+  int sockfd, newsockfd, portno;
+
+  socklen_t clilen;
+  struct sockaddr_in serv_addr, cli_addr;
+
+  char buffer[BUFFER_SIZE];
   char line[100];
-
-  FILE * file = fopen("entries.txt", "r");
-
   char fix_logon_answer[100];
-
-  fscanf(file, "%s\n", fix_logon_answer);
-
   char fix_subscription_answer[100];
 
-  fscanf(file, "%s\n", fix_subscription_answer);
+  FILE * file = fopen("entries.txt", "r");
 
   if (argc < 2) {
     fprintf(stderr,"ERROR, no port provided\n");
@@ -68,14 +63,12 @@ int main(int argc, char *argv[]) {
     error("ERROR reading from socket");
   }
 
-  printf("Received: %s\n", buffer);
-  printf("Sending back: %s\n", fix_logon_answer);
-
+  /* Send first message */
+  fscanf(file, "%s\n", fix_logon_answer);
   n = write(newsockfd, fix_logon_answer, strlen(fix_logon_answer));
   if (n < 0) {
     error("ERROR writing to socket");
   }
-  /* Established FIX session, messages will now be exchanged via newsockfd */
 
   bzero(buffer, BUFFER_SIZE);
   n = read(newsockfd, buffer, BUFFER_SIZE);
@@ -83,14 +76,14 @@ int main(int argc, char *argv[]) {
     error("ERROR reading from socket");
   }
 
-  printf("Received: %s\n", buffer);
-  printf("Sending back: %s\n", fix_subscription_answer);
-
+  /* Send second message */
+  fscanf(file, "%s\n", fix_subscription_answer);
   n = write(newsockfd, fix_subscription_answer, strlen(fix_subscription_answer));
   if (n < 0) {
     error("ERROR writing to socket");
   }
 
+  /* Send remaining messages */
   while ((n = fscanf(file, "%s\n", line)) != EOF) {
     n = write(newsockfd, line, strlen(line));
     if (n < 0) {

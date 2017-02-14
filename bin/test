@@ -1,0 +1,13 @@
+#!/bin/bash
+
+n_times=$1
+
+./bin/build
+
+echo "==> Testing "$n_times" times for "$(wc -l entries.txt | awk '{print $1}')" entries..."
+
+for n in $(seq 1 $n_times); do
+  container_id=$(./bin/run) && \
+    { time nc 192.168.99.100 4200 < netcat_input.txt > /dev/null; } 2>&1 | grep real | awk '{print $2}' && \
+    docker rm $container_id > /dev/null
+done
