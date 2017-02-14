@@ -20,10 +20,17 @@ int main(int argc, char *argv[]) {
   struct sockaddr_in serv_addr, cli_addr;
   int n;
   int i;
+  char line[100];
 
-  char fix_logon_answer[] = "8=FIX.4.2""\x1""9=79""\x1""35=A""\x1""34=1""\x1""49=ACCEPTOR""\x1""52=20170213-20:56:07.810""\x1""56=INITIATOR""\x1""98=0""\x1""108=600""\x1""141=Y""\x1""10=101""\x1";
+  FILE * file = fopen("entries.txt", "r");
 
-  char fix_subscription_answer[] = "8=FIX.4.2""\x1""9=87""\x1""35=W""\x1""34=2""\x1""49=ACCEPTOR""\x1""52=20170213-20:56:07.868""\x1""56=INITIATOR""\x1""22=8""\x1""48=""\x1""55=""\x1""207=BVMF""\x1""262=""\x1""10=021""\x1";
+  char fix_logon_answer[100];
+
+  fscanf(file, "%s\n", fix_logon_answer);
+
+  char fix_subscription_answer[100];
+
+  fscanf(file, "%s\n", fix_subscription_answer);
 
   if (argc < 2) {
     fprintf(stderr,"ERROR, no port provided\n");
@@ -84,18 +91,16 @@ int main(int argc, char *argv[]) {
     error("ERROR writing to socket");
   }
 
-  /* for (i = 0; i < 100; i++) { */
-  /*   n = write(newsockfd, fix_update_message, strlen(fix_update_message)); */
-  /*   if (n < 0) { */
-  /*     error("ERROR writing to socket"); */
-  /*   }     */
-  /*   sleep(1); */
-  /* } */
-
-  sleep(2);
+  while ((n = fscanf(file, "%s\n", line)) != EOF) {
+    n = write(newsockfd, line, strlen(line));
+    if (n < 0) {
+      error("ERROR writing to socket");
+    }
+  }
 
   close(newsockfd);
   close(sockfd);
+  fclose(file);
 
   return 0;
 }

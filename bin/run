@@ -1,6 +1,7 @@
 #!/bin/bash
 
 docker run -it \
-       --name=mock-acceptor-container \
-       -p 4200:4200 \
-       mock-acceptor
+               --rm \
+               --name=mock-acceptor-container \
+               -p 4200:4200 \
+               mock-acceptor

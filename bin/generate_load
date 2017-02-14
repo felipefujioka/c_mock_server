@@ -1,0 +1,8 @@
+#!/bin/bash
+
+number_of_lines=$1
+
+for ((n=0;n<$number_of_lines;n++))
+do
+    echo "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab"
+done
