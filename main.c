@@ -57,12 +57,13 @@ int main(int argc, char *argv[]) {
     error("ERROR on accept");
   }
 
-  /* bzero(buffer, BUFFER_SIZE); */
-  /* n = read(newsockfd, buffer, BUFFER_SIZE); */
-  /* if (n < 0) { */
-  /*   error("ERROR reading from socket"); */
-  /* } */
-  /* printf("Received: %s\n", buffer); */
+  /* Wait for first message */
+  bzero(buffer, BUFFER_SIZE);
+  n = read(newsockfd, buffer, BUFFER_SIZE);
+  if (n < 0) {
+    error("ERROR reading from socket");
+  }
+  printf("Received: %s\n", buffer);
 
   /* Send first message            */
   fscanf(file, "%s\n", fix_logon_answer);
