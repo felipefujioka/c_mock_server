@@ -44,6 +44,7 @@ int main(int argc, char *argv[])
      if (newsockfd < 0)
           error("ERROR on accept");
      bzero(buffer,256);
+     printf("Listening on port %d", portno);
      n = read(newsockfd,buffer,255);
      if (n < 0) error("ERROR reading from socket");
      printf("Here is the message: %s\n",buffer);
