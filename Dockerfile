@@ -6,4 +6,4 @@ WORKDIR /usr/src/myapp
 
 RUN make
 
-CMD ["./mock_server", "4200"]
+ENTRYPOINT ["./mock_server", "4200"]

@@ -25,12 +25,17 @@ int main(int argc, char *argv[]) {
   char fix_logon_answer[100];
   char fix_subscription_answer[100];
 
-  FILE * file = fopen("1000000.msgs", "r");
+  char* filename;
 
-  if (argc < 2) {
-    fprintf(stderr,"ERROR, no port provided\n");
+  FILE * file;
+
+  if (argc < 3) {
+    fprintf(stderr,"ERROR, no port or filename provided\n");
     exit(1);
   }
+
+  filename = argv[2];
+  file = fopen(filename, "r");
 
   sockfd = socket(AF_INET, SOCK_STREAM, 0);
   if (sockfd < 0) {
