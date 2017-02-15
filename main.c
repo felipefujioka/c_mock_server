@@ -9,6 +9,7 @@
 #include <unistd.h>
 
 #define BUFFER_SIZE 2048
+#define PRINT_SENT_MESSAGES 0
 
 void error(const char *msg) {
   perror(msg);
@@ -25,19 +26,19 @@ int main(int argc, char *argv[]) {
   char buffer[BUFFER_SIZE];
   char line[100];
   char fix_logon_answer[100];
-  char fix_subscription_answer[100];
 
   char* filename;
 
   FILE * file;
   int messages_sent = 0;
 
-  clock_t cpu_start;
-  clock_t cpu_end;
-  double elapsed_time;
-
   double elapsed_wallclock_time;
   struct timeval wallclock_start, wallclock_end;
+  struct timespec nanosleep_tim;
+
+  /* Nanosleep configuration */
+  nanosleep_tim.tv_sec = 0;
+  nanosleep_tim.tv_nsec = 200000L; /* 5000msg/s */
 
   if (argc < 3) {
     fprintf(stderr,"ERROR, no port or filename provided\n");
@@ -46,6 +47,9 @@ int main(int argc, char *argv[]) {
 
   filename = argv[2];
   file = fopen(filename, "r");
+  if (file == NULL) {
+    error("Error: file not found");
+  }
 
   sockfd = socket(AF_INET, SOCK_STREAM, 0);
   if (sockfd < 0) {
@@ -82,8 +86,10 @@ int main(int argc, char *argv[]) {
 
   /* Send first message            */
   gettimeofday(&wallclock_start, NULL);
-  cpu_start = clock();
   fscanf(file, "%s\n", fix_logon_answer);
+  if (PRINT_SENT_MESSAGES) {
+    printf("Sending %s...\n", fix_logon_answer);
+  }
   n = write(newsockfd, fix_logon_answer, strlen(fix_logon_answer));
   messages_sent++;
   if (n < 0) {
@@ -99,30 +105,35 @@ int main(int argc, char *argv[]) {
   /* printf("Received: %s\n", buffer); */
 
   /* Send second message */
-  fscanf(file, "%s\n", fix_subscription_answer);
-  n = write(newsockfd, fix_subscription_answer, strlen(fix_subscription_answer));
-  messages_sent++;
-  if (n < 0) {
-    error("ERROR writing to socket");
-  }
+  /* fscanf(file, "%s\n", fix_subscription_answer); */
+  /* if (PRINT_SENT_MESSAGES) { */
+  /*   printf("Sending %s...\n", fix_subscription_answer); */
+  /* } */
+  /* n = write(newsockfd, fix_subscription_answer, strlen(fix_subscription_answer)); */
+  /* messages_sent++; */
+  /* if (n < 0) { */
+  /*   error("ERROR writing to socket"); */
+  /* } */
 
   /* Send remaining messages */
   while ((n = fscanf(file, "%s\n", line)) != EOF) {
+    if (PRINT_SENT_MESSAGES) {
+      printf("Sending %s...\n", line);
+    }
     n = write(newsockfd, line, strlen(line));
     messages_sent++;
     if (n < 0) {
       error("ERROR writing to socket");
     }
+
+    nanosleep(&nanosleep_tim, NULL);
   }
 
-  cpu_end = clock();
   gettimeofday(&wallclock_end, NULL);
-
-  elapsed_time = ((double) (cpu_end - cpu_start)) / CLOCKS_PER_SEC;
   elapsed_wallclock_time = (double) (((long) (wallclock_end.tv_sec * 1000000 + wallclock_end.tv_usec)
                                       - (wallclock_start.tv_sec * 1000000 + wallclock_start.tv_usec))) / 1000;
 
-  printf("Sent %d messages in %fs (CPU) %fms (real)\n", messages_sent,  elapsed_time, elapsed_wallclock_time);
+  printf("Sent %d messages in %fms (real)\n", messages_sent, elapsed_wallclock_time);
 
   close(newsockfd);
   close(sockfd);
